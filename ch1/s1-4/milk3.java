@@ -1,154 +1,72 @@
 /*
-ID:
+ID: 
 LANG: JAVA
 TASK: milk3
 */
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-public class milk3 {
-	
-	// bucket capacities
-	public static int a = 0;
-	public static int b = 0;
-	public static int c = 0;
-	public static boolean[][] seen;
-	public static ArrayList<Integer> list = new ArrayList<Integer>();
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.StringTokenizer;
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) throws IOException {
-		// TODO Auto-generated method stub
-		BufferedReader f = new BufferedReader(new FileReader("milk3.in"));
-		PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("milk3.out")));
-		
-		StringTokenizer st = new StringTokenizer(f.readLine());
-		
-		a = Integer.parseInt(st.nextToken());
-		b = Integer.parseInt(st.nextToken());
-		c = Integer.parseInt(st.nextToken());
-		
-		seen = new boolean[b+1][c+1];
-		
-		// test
-		//System.out.println("the values of a, b, c are " + a + " " + b + " " + c);
-		//pourCA(0, 0, c);		
-		
-		
-		pour(0, 0, c);
-		Collections.sort(list);
-		for(int i=0; i<list.size()-1; i++) {
-			out.write(list.get(i) + " ");
-		}
-		out.write(list.get(list.size()-1) + "\n");
-		out.close();
-		System.exit(0);
-
-	}
+public class milk3 
+{
+	private static int[] buckets = new int[3];
+	//private static int M;
 	
-	// main pouring method
-	public static void pour(int an, int bn, int cn) {
-		pourAB(an, bn, cn);
-		pourAC(an, bn, cn);
-		pourBA(an, bn, cn);
-		pourBC(an, bn, cn);
-		pourCA(an, bn, cn);
-		pourCB(an, bn, cn);
-	}
-	
-	// different pour functions, 6 total
-	public static void pourAB(int an, int bn, int cn) {
-		while(an>0 && bn < b) {
-			an--;
-			bn++;
-		}
-		if(an == 0 && !(list.contains(cn))) {
-			list.add(cn);
-		}
-		//System.out.println("Poured from A to B (" + an + ", " + bn + ", " + cn);
-		if(!seen[bn][cn]) {
-			seen[bn][cn] = true;
-			pour(an, bn, cn);
-		}
-	}
-	
-	public static void pourAC(int an, int bn, int cn) {
-		while(an>0 && cn < c) {
-			an--;
-			cn++;
-		}
-		if(an == 0 && !(list.contains(cn))) {
-			list.add(cn);
-		}		
-		//System.out.println("Poured from A to C (" + an + ", " + bn + ", " + cn);
-		if(!seen[bn][cn]) {
-			seen[bn][cn] = true;
-			pour(an, bn, cn);
-		}	
-	}
-	
-	public static void pourBA(int an, int bn, int cn) {
-		while(bn>0 && an < a) {
-			bn--;
-			an++;
-		}
-
-		if(an == 0 && !(list.contains(cn))) {
-			list.add(cn);
-		}		
-		//System.out.println("Poured from B to A (" + an + ", " + bn + ", " + cn);
-		if(!seen[bn][cn]) {
-			seen[bn][cn] = true;
-			pour(an, bn, cn);
-		}	
-	}
-	
-	public static void pourBC(int an, int bn, int cn) {
-		while(bn>0 && cn < c) {
-			bn--;
-			cn++;
-		}
-		if(an == 0 && !(list.contains(cn))) {
-			list.add(cn);
-		}		
-		//System.out.println("Poured from B to C (" + an + ", " + bn + ", " + cn);
-		if(!seen[bn][cn]) {
-			seen[bn][cn] = true;
-			pour(an, bn, cn);
-		}	
-	}
-	
-	public static void pourCA(int an, int bn, int cn) {
-		while(cn>0 && an < a) {
-			cn--;
-			an++;
-		}
-		if(an == 0 && !(list.contains(cn))) {
-			list.add(cn);
-		}		
-		//System.out.println("Poured from C to A (" + an + ", " + bn + ", " + cn);
-		if(!seen[bn][cn]) {
-			seen[bn][cn] = true;
-			pour(an, bn, cn);
-		}		
-	}
-	
-	public static void pourCB(int an, int bn, int cn) {
-		while(cn>0 && bn < b) {
-			cn--;
-			bn++;
-		}
-		if(an == 0 && !(list.contains(cn))) {
-			list.add(cn);
-		}
-		//System.out.println("Poured from C to B (" + an + ", " + bn + ", " + cn);
-		if(!seen[bn][cn]) {
-			seen[bn][cn] = true;
-			pour(an, bn, cn);
-		}
-	}
-	
-
+    public static void main(String[] args) throws IOException 
+    {
+        BufferedReader f = new BufferedReader(new FileReader("milk3.in"));
+        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(
+        		"milk3.out")));
+        StringTokenizer st = new StringTokenizer(f.readLine());
+        for (int i=0; i<3; i++)
+        	buckets[i] = Integer.parseInt(st.nextToken());
+        //M = buckets[2];
+        boolean[][] seen = new boolean[buckets[1]+1][buckets[2]+1];
+        
+        ArrayDeque<int[]> configs = new ArrayDeque<int[]>();
+        configs.add(new int[] {0, 0, buckets[2]});
+        ArrayDeque<Integer> left = new ArrayDeque<Integer>();
+        
+    	int[][] pours = { {0,1}, {0,2}, {1,0}, {1,2}, {2,0}, {2,1} };
+        while (configs.size() > 0) {
+        	int[] m = configs.poll();
+        	seen[m[1]][m[2]] = true;
+        	if (m[0] == 0 && !left.contains(m[2]))
+        		left.add(m[2]);
+        	for (int i=0; i<pours.length; i++) {
+        		int[] res = pour(m, pours[i][0], pours[i][1]);
+        		if (!seen[res[1]][res[2]])
+        			configs.add(res);
+        	}
+        }
+        
+        Integer[] res = left.toArray(new Integer[0]);
+        Arrays.sort(res);
+        for (int i=0; i<res.length-1; i++)
+        	out.write(res[i] + " ");
+        out.write(res[res.length-1] + "\n");
+        out.close();
+        
+        f.close();
+        out.close();
+        System.exit(0);
+    }
+    
+    private static int[] pour(int[] m, int src, int dest) {
+    	int[] res = new int[3];
+    	System.arraycopy(m, 0, res, 0, m.length);
+    	while (res[src] > 0 && res[dest] < buckets[dest]) {
+    		res[src]--;
+    		res[dest]++;
+    	}
+    	return res;
+    }
 }
